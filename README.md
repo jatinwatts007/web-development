@@ -1,2 +1,2 @@
-# wed-developent
+# web-developent
 html codes
