@@ -1,2 +1,2 @@
-# web-developent
+# web-development
 html codes
