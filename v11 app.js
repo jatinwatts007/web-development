@@ -31,7 +31,7 @@ campgroundsRoutes  = require("./routes/campgrounds"),
 
 
 
-// seedDB();
+ seedDB();
 
 
 
