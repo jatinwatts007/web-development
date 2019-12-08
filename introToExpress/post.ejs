@@ -1,0 +1,12 @@
+<% include partials/header %>
+
+
+<h1>
+	this is the post page
+</h1>
+<% for(var i=0; i<posts.length ;i++){ %>
+		<li> 
+			<%= posts[i].name %>  - <strong> <%= posts[i].class %></strong>
+        </li>
+ <% } %>
+<% include partials/footer %>
