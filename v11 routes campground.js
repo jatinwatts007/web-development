@@ -2,7 +2,10 @@ var express = require("express");
 var router = express.Router();
 var campground = require("../models/campgrounds");
 var middleware = require("../middleware");
+var User = require("../models/user");
+var Notification = require("../models/notification");
 var multer = require('multer');
+
 var storage = multer.diskStorage({
   filename: function(req, file, callback) {
     callback(null, Date.now() + file.originalname);
@@ -19,7 +22,7 @@ var upload = multer({ storage: storage, fileFilter: imageFilter})
 
 var cloudinary = require('cloudinary');
 cloudinary.config({ 
-  cloud_name: 'yelpcamp007exports', 
+  cloud_name: 'yelpcamp007', 
   api_key: process.env.CLOUDINARY_API_KEY, 
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
@@ -60,16 +63,23 @@ router.get("/new",middleware.isLoggedIn,function(req, res){
 });
 
 //CREATE - add new campground to DB
-router.post("/", middleware.isLoggedIn,upload.single("image"),function(req, res){
+router.post("/", middleware.isLoggedIn,upload.single('image'),function(req, res){
  
 	// get data from form and add to campgrounds array
   var name = req.body.name;
   var image = req.body.image;
+  var price = req.body.price;	
   var description = req.body.description;
   var author = {
       id: req.user._id,
       username: req.user.username
   };
+	cloudinary.uploader.upload(req.file.path, function(result) {
+ 			 // add cloudinary url for the image to the campground object under image property
+ 	 		image = result.secure_url;
+		console.log(image);
+ 	 		// add author to campground
+	   });
   geocoder.geocode(req.body.location, function (err, data) {
     if (err || !data.length) {
       console.log(err);
@@ -79,22 +89,27 @@ router.post("/", middleware.isLoggedIn,upload.single("image"),function(req, res)
     var lat = data[0].latitude;
     var lng = data[0].longitude;
     var location = data[0].formattedAddress;
-    var newCampground = {name: name, image: image, description: description, author:author, location: location, lat: lat, lng: lng};
-	   cloudinary.uploader.upload(req.file.path, function(result) {
- 			 // add cloudinary url for the image to the campground object under image property
- 	 		req.body.image = result.secure_url;
- 	 		// add author to campground
+    var newCampground = {name: name, image: image, description: description, author:author, location: location, lat: lat, lng: lng,price:price};
     		// Create a new campground and save to DB
-    	campground.create(newCampground, function(err, newlyCreated){
+    	campground.create(newCampground, async function(err, newlyCreated){
         	if(err){
             	console.log(err);
         	} else {
+				let user = await User.findById(req.user._id).populate('followers').exec();
+      let newNotification = {
+        username: req.user.username,
+        campgroundId: campground.id
+      }
+      for(const follower of user.followers) {
+        let notification = await Notification.create(newNotification);
+        follower.notifications.push(notification);
+        follower.save();
+      }
             	//redirect back to campgrounds page
             	console.log(newlyCreated);
             	res.redirect("/campgrounds");
         	}
 	   	});
-  });
   });
 });
 
@@ -119,6 +134,37 @@ router.get("/:id/edit",middleware.checkCampgroundOwnership,function(req,res){
 	campground.findById(req.params.id,function(err,foundCampground){
 	res.render("campgrounds/edit",{campground:foundCampground});
 	});
+});
+
+// Campground Like Route
+router.post("/:id/like", middleware.isLoggedIn, function (req, res) {
+    campground.findById(req.params.id).populate("comments likes").exec(function (err, foundCampground) {
+        if (err) {
+            console.log(err);
+            return res.redirect("/campgrounds");
+        }
+
+        // check if req.user._id exists in foundCampground.likes
+        var foundUserLike = foundCampground.likes.some(function (like) {
+            return like.equals(req.user._id);
+        });
+
+        if (foundUserLike) {
+            // user already liked, removing like
+            foundCampground.likes.pull(req.user._id);
+        } else {
+            // adding the new user like
+            foundCampground.likes.push(req.user);
+        }
+
+        foundCampground.save(function (err) {
+            if (err) {
+                console.log(err);
+                return res.redirect("/campgrounds");
+            }
+            return res.redirect("/campgrounds/" + foundCampground._id);
+        });
+    });
 });
 
 // UPDATE CAMPGROUND ROUTE
