@@ -30,6 +30,9 @@
 					<h4><%= campground.name %></h4>
 				</div>
 				</div>
+				<div>
+           <span class="badge label-primary"><i class="fas fa-thumbs-up"></i> <%= campground.likes.length %></span>
+       </div>
 				<p>
 					<a href="/campgrounds/<%= campground._id %>" class="btn btn-primary">more info</a>
 				</p>
