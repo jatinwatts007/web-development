@@ -11,7 +11,7 @@ var campgroundSchema = new mongoose.Schema({
 	author:{
 		id:{
 			type:mongoose.Schema.Types.ObjectId,
-			ref:"user"
+			ref:"User"
 		},
 		username:String
 	},
@@ -20,7 +20,13 @@ var campgroundSchema = new mongoose.Schema({
 			type:mongoose.Schema.Types.ObjectId,
 			ref:"comment"
 		}
-	]
+	],
+	likes: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ]
 });
 
 module.exports = mongoose.model("campground",campgroundSchema);
