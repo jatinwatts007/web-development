@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>JS Example</title>
+	<style>
+* {
+	font-size: 18px;
+	font-family: Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif";
+}
+		
+		button[type="submit"]{
+			border-radius: 8px;
+			background-color: aquamarine;
+			font-family: Impact, Haettenschweiler, "Franklin Gothic Bold", "Arial Black", "sans-serif";
+			letter-spacing: 3px;
+		}
+		input[type="text"]
+		{
+			padding-left: 10px;
+			padding-right: 10px;
+			border-radius: 10px;
+			height: 30px;
+		}
+		div
+</style>
+</head>
+
+<body>
+	<div class="heading">
+	<p><h1>Enter a value to print it's table</h1></p>
+	</div>
+	<div class="input">
+	<input type="text" id="input">
+		<button id="myBtn" type="submit" onClick="execute();" style="text-transform: uppercase;">Submit</button>
+	</div>
+	<br>
+	<div id="div-1"></div>
+	<div id="div-2"></div>
+	<div id="div-3"></div>
+	<div id="div-4"></div>
+	<div id="div-5"></div>
+	<div id="div-6"></div>
+	<div id="div-7"></div>
+	<div id="div-8"></div>
+	<div id="div-9"></div>
+	<div id="div-10"></div>
+	
+	<script type="text/javascript">
+	var variable=0;
+			var inp=document.getElementById("input");
+		inp.addEventListener("keyup",function(event)
+		{
+							 if (event.keyCode === 13) {
+								 event.preventDefault();
+    // Trigger the button element with a click
+    document.getElementById("myBtn").click();
+  }
+		});
+	
+		
+		function execute()
+		{
+			for(var loop=1;loop<=10;loop++)
+			{
+				document.getElementById("div-"+loop).innerHTML=document.getElementById("input").value+" * "+loop+" = "+loop*document.getElementById("input").value;
+			}
+		}
+		
+	</script>
+</body>
+</html>
